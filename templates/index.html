@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Data Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+   
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- Logo and Title Container -->
+          <div class="header-brand">
+    <img src="{{ url_for('static', filename='Barclay Digital Services Logo Full Colour.png') }}" 
+         alt="Barclay Digital Services" 
+         class="company-logo"
+         style="height: 40px; max-width: 200px;">
+    <h1>Sales Data Dashboard</h1>
+</div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" />
+                </div>
+                <div class="control-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" />
+                </div>
+                <div class="control-group">
+                    <label for="repStatus">Rep Status</label>
+                    <select id="repStatus">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="loadData()">Load Data</button>
+                <button class="btn btn-green" onclick="exportTableToExcel()">Export to Excel</button>
+                <button class="btn btn-green" onclick="exportTableToCSV()">Export to CSV</button>
+                <button class="btn btn-analytics" onclick="openAnalytics()">📊 View Analytics</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search for rep name...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="table-wrapper">
+                <div id="loadingMessage" class="loading">Loading data...</div>
+                <table id="dataTable" style="display: none;">
+                    <thead id="tableHeader"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for drill-down data -->
+    <div id="drillDownModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Detail View</h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let salesData = [];
+        let filteredData = [];
+
+        // Initialize date inputs with default values
+        document.addEventListener('DOMContentLoaded', function() {
+            function formatDateLocal(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('startDate').value = formatDateLocal(firstDayOfMonth);
+            document.getElementById('endDate').value = formatDateLocal(today);
+            document.getElementById('repStatus').value = '1';
+            
+            // Load initial data
+            loadData();
+            
+            // Add search functionality
+            document.getElementById('searchInput').addEventListener('input', filterData);
+        });
+
+        async function loadData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const repStatus = document.getElementById('repStatus').value;
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('dataTable').style.display = 'none';
+
+            try {
+                const basePath = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname;
+                const response = await fetch(`${basePath}/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`);
+
+                <!-- const response = await fetch(`/RepsGP/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`); -->
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                salesData = await response.json();
+                filteredData = [...salesData];
+                
+                if (salesData.length > 0) {
+                    buildTable();
+                } else {
+                    document.getElementById('loadingMessage').innerHTML = '<div class="no-results">No data found for the selected criteria</div>';
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loadingMessage').innerHTML = '<div class="no-results">Error loading data. Please check your connection and try again.</div>';
+            }
+        }
+
+        function buildTable() {
+            if (filteredData.length === 0) {
+                document.getElementById('loadingMessage').innerHTML = '<div class="no-results">No results found</div>';
+                document.getElementById('dataTable').style.display = 'none';
+                return;
+            }
+
+            const table = document.getElementById('dataTable');
+            const header = document.getElementById('tableHeader');
+            const body = document.getElementById('tableBody');
+
+            // Clear existing content
+            header.innerHTML = '';
+            body.innerHTML = '';
+
+            // Define the specific column order
+            const columns = [
+                'RepName', 'TeamName', 'IsRep', 'SumGP', 'ReferralGP', 'Addition', 'Reversal', 'GPTotal', 
+                'OverspendGP', 'DiscretionaryGP', 'OtherDisctrtionaryGP', 'MDMGP', 'FreshGP', 'BCADGP', 
+                'FinalGPTotal', 'TotNew', 'TotResign', 'TotConnections', 'LL_SumGP', 'LL_Addition', 
+                'LL_Reversal', 'LLOtherDisctrtionaryGP', 'GammaNewGP', 'GammaRSGP', 'iPecsNewGP', 
+                'iPecsRSGP', '3CXNewGP', '3CXRSGP', 'Telephony_Undefined', 'LL_FinalGPTotal', 
+                'Gamma_NEW_Seats', 'Gamma_RS_Seats', 'iPecs_NEW_Seats', 'iPecs_RS_Seats', '3CXNewSeats', 
+                '3CXRSSeats', 'TotSeats', 'NoProviderGP', 'NoProviderDealAddition', 'NoProviderDealReversal', 
+                'FinalNoProviderGP', 'BDSIT/ITHardwareOnlyGP', 'BDSIT_DealAddition', 'BDSIT_DealReversal', 
+                'FinalBDSIT/ITHardwareOnly', 'OverallTotalGP'
+            ];
+
+            const headerRow = document.createElement('tr');
+            
+            columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column;
+                headerRow.appendChild(th);
+            });
+            header.appendChild(headerRow);
+
+            // Build body
+            filteredData.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                
+                columns.forEach((column, colIndex) => {
+                    const td = document.createElement('td');
+                    const value = row[column];
+                    
+                    // Format numbers with commas
+                    if (typeof value === 'number' && !isNaN(value)) {
+                        td.textContent = value.toLocaleString();
+                    } else {
+                        td.textContent = value || '';
+                    }
+                    
+                    // Make cells clickable (except RepName and TeamName)
+                    if (column !== 'RepName' && column !== 'TeamName' && column !== 'IsRep') {
+                        td.classList.add('clickable-cell');
+                        td.addEventListener('click', () => showDrillDown(row, column, value));
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                
+                body.appendChild(tr);
+            });
+
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('dataTable').style.display = 'table';
+        }
+
+        function filterData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                filteredData = [...salesData];
+            } else {
+                filteredData = salesData.filter(row => 
+                    row.RepName && row.RepName.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            buildTable();
+        }
+
+        function showDrillDown(row, column, value) {
+            const modal = document.getElementById('drillDownModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `${column} Details - ${row.RepName}`;
+
+            // Create detailed view
+            let content = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Selected Value</h4>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 15px; border-radius: 12px; font-size: 1.2rem; font-weight: bold;">
+                        ${column}: ${typeof value === 'number' ? value.toLocaleString() : value}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Representative Information</h4>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border-left: 4px solid #667eea;">
+                        <p><strong>Rep Name:</strong> ${row.RepName}</p>
+                        <p><strong>Team:</strong> ${row.TeamName}</p>
+                        <p><strong>Status:</strong> ${row.IsRep ? 'Active' : 'Inactive'}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Related Metrics</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+            `;
+
+            // Add all specified metrics in cards
+            const keyMetrics = [
+                'SumGP','ReferralGP','Addition','Reversal','GPTotal','OverspendGP','DiscretionaryGP', 'OtherDisctrtionaryGP',
+                'MDMGP','FreshGP','BCADGP','FinalGPTotal',  'TotNew', 'TotResign', 'TotConnections','LL_SumGP', 'LL_Addition',
+                'LL_Reversal','LLOtherDisctrtionaryGP','GammaNewGP', 'GammaRSGP','iPecsNewGP', 'iPecsRSGP', '3CXNewGP','3CXRSGP',
+                'Telephony_Undefined','LL_FinalGPTotal', 'Gamma_NEW_Seats', 'Gamma_RS_Seats','iPecs_NEW_Seats','iPecs_RS_Seats', 
+                '3CXNewSeats', '3CXRSSeats',  'TotSeats','NoProviderGP','NoProviderDealAddition', 'NoProviderDealReversal',
+                 'FinalNoProviderGP','BDSIT/ITHardwareOnlyGP', 'BDSIT_DealAddition','BDSIT_DealReversal', 
+                'FinalBDSIT/ITHardwareOnly', 'OverallTotalGP'
+            ];
+            
+            keyMetrics.forEach(metric => {
+                if (row[metric] !== undefined) {
+                    const metricValue = typeof row[metric] === 'number' ? row[metric].toLocaleString() : row[metric];
+                    const isSelectedColumn = metric === column;
+                    const cardStyle = isSelectedColumn 
+                        ? 'background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none;' 
+                        : 'background: white; border: 1px solid #e1e5e9; color: #333;';
+                    
+                    content += `
+                        <div style="${cardStyle} padding: 12px; border-radius: 8px; text-align: center; transition: all 0.2s ease;">
+                            <div style="font-size: 0.75rem; margin-bottom: 5px; opacity: ${isSelectedColumn ? '0.9' : '0.7'};">${metric}</div>
+                            <div style="font-size: 1rem; font-weight: bold;">${metricValue}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            content += `
+                    </div>
+                </div>
+            `;
+
+            modalContent.innerHTML = content;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('drillDownModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('drillDownModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function exportTableToExcel() {
+            const table = document.getElementById("dataTable");
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+            XLSX.writeFile(wb, "sales_data.xlsx");
+        }
+
+        function exportTableToCSV() {
+            const table = document.getElementById("dataTable");
+            let csv = [];
+            for (let row of table.rows) {
+                let rowData = [];
+                for (let cell of row.cells) {
+                    rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+                }
+                csv.push(rowData.join(","));
+            }
+            const csvString = csv.join("\n");
+            const blob = new Blob([csvString], { type: "text/csv" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "sales_data.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function openAnalytics() {
+            // Get current filter settings
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const repStatus = document.getElementById('repStatus').value;
+            
+            // Prepare data package for analytics
+            const analyticsDataPackage = {
+                data: filteredData, // Current filtered data
+                originalData: salesData, // Complete dataset
+                filters: {
+                    startDate: startDate,
+                    endDate: endDate,
+                    repStatus: repStatus
+                },
+                
+                timestamp: new Date().toISOString()
+            };
+            
+            // Save to localStorage for analytics page to access
+            try {
+                localStorage.setItem('salesAnalyticsData', JSON.stringify(analyticsDataPackage));
+                
+                // Open analytics page in new tab
+                const analyticsWindow = window.open('analytics.html', '_blank');
+                
+                // Check if popup was blocked
+                if (!analyticsWindow) {
+                    alert('Popup blocked! Please allow popups for this site to view analytics, or open analytics.html manually.');
+                }
+            } catch (error) {
+                console.error('Error saving data for analytics:', error);
+                alert('Error preparing analytics data. Please try again.');
+            }
+        }
+    </script>
+ 
+    
+</body>
+</html>

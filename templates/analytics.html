@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analytics Dashboard</title>
+	 <link rel="stylesheet" href="{{ url_for('static', filename='analysis.css') }}">
+     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+   
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Sales Analytics Dashboard</h1>
+            <div class="controls">
+                <button class="btn" onclick="loadAnalytics()">Refresh Analytics</button>
+                <button class="btn btn-secondary" onclick="goBackToDashboard()">Back to Data Table</button>
+            </div>
+        </div>
+
+        <div id="loadingMessage" class="loading">Loading analytics...</div>
+        
+        <div id="analyticsContent" style="display: none;">
+            <!-- Key Metrics -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be populated here -->
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Top 10 Representatives by Total GP</h3>
+                    <canvas id="topRepsChart" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">GP Distribution by Categories</h3>
+                    <canvas id="gpCategoriesChart" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Team Performance Comparison</h3>
+                    <canvas id="teamPerformanceChart" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Active vs Inactive Representatives</h3>
+                    <canvas id="repStatusChart" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Product Mix Analysis (Seats)</h3>
+                    <canvas id="productMixChart" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">GP Performance Trend</h3>
+                    <canvas id="performanceTrendChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Insights Section -->
+            <div class="insights-section">
+                <h2 class="insights-title">🔍 Key Insights</h2>
+                <div id="insightsContainer">
+                    <!-- Insights will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="noDataMessage" class="no-data" style="display: none;">
+            No data available for analysis. Please load data from the main dashboard first.
+        </div>
+    </div>
+
+    <script>
+        let analyticsData = [];
+        let charts = {};
+
+        // Load analytics data
+        async function loadAnalytics() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('analyticsContent').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'none';
+
+            try {
+                // First, try to get data from localStorage (passed from main dashboard)
+                const savedData = localStorage.getItem('salesAnalyticsData');
+                
+                if (savedData) {
+                    const dataPackage = JSON.parse(savedData);
+                    analyticsData = dataPackage.data || dataPackage.originalData || [];
+                    
+                    // Update header with filter information
+                    updateHeaderWithFilterInfo(dataPackage.filters);
+                    
+                    console.log('Loaded data from main dashboard:', analyticsData.length, 'records');
+                } else {
+                    // Fallback: try to fetch from API
+                    const basePath = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname;
+                    const response = await fetch(`${basePath}/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`);
+                    <!-- const response = await fetch('/RepsGP/api/salesdata?start=2024-01-01&end=2024-12-31&rep=All'); -->
+                    if (response.ok) {
+                        analyticsData = await response.json();
+                        console.log('Loaded data from API:', analyticsData.length, 'records');
+                    } else {
+                        throw new Error('No API data available');
+                    }
+                }
+
+                if (analyticsData.length > 0) {
+                    buildAnalytics();
+                } else {
+                    document.getElementById('noDataMessage').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                // Use sample data for demonstration
+                analyticsData = generateSampleData();
+                buildAnalytics();
+                console.log('Using sample data for demonstration');
+            }
+
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function updateHeaderWithFilterInfo(filters) {
+            if (!filters) return;
+            
+            const headerElement = document.querySelector('.header h1');
+            let filterText = '📊 Sales Analytics Dashboard';
+            
+            if (filters.startDate && filters.endDate) {
+                const startDate = new Date(filters.startDate).toLocaleDateString();
+                const endDate = new Date(filters.endDate).toLocaleDateString();
+                filterText += `<br><small style="font-size: 1rem; opacity: 0.8;">Period: ${startDate} - ${endDate}</small>`;
+            }
+            
+            if (filters.repStatus && filters.repStatus !== 'All') {
+                const status = filters.repStatus === '1' ? 'Active' : 'Inactive';
+                filterText += `<br><small style="font-size: 1rem; opacity: 0.8;">Representatives: ${status} Only</small>`;
+            }
+            
+            headerElement.innerHTML = filterText;
+        }
+
+        function generateSampleData() {
+            const sampleReps = ['John Smith', 'Sarah Johnson', 'Mike Wilson', 'Lisa Brown', 'David Lee', 'Emma Davis', 'Tom Miller', 'Amy Taylor', 'Chris Anderson', 'Kate Thompson'];
+            const teams = ['Alpha', 'Beta', 'Gamma', 'Delta'];
+            
+            return sampleReps.map((name, index) => ({
+                RepName: name,
+                TeamName: teams[index % teams.length],
+                IsRep: index < 8 ? 1 : 0,
+                SumGP: Math.floor(Math.random() * 50000) + 10000,
+                FinalGPTotal: Math.floor(Math.random() * 60000) + 15000,
+                OverallTotalGP: Math.floor(Math.random() * 70000) + 20000,
+                TotNew: Math.floor(Math.random() * 100) + 10,
+                TotResign: Math.floor(Math.random() * 50) + 5,
+                TotSeats: Math.floor(Math.random() * 500) + 50,
+                Gamma_NEW_Seats: Math.floor(Math.random() * 100),
+                iPecs_NEW_Seats: Math.floor(Math.random() * 80),
+                '3CXNewSeats': Math.floor(Math.random() * 60),
+                GammaNewGP: Math.floor(Math.random() * 15000),
+                iPecsNewGP: Math.floor(Math.random() * 12000),
+                '3CXNewGP': Math.floor(Math.random() * 10000),
+                MDMGP: Math.floor(Math.random() * 8000),
+                FreshGP: Math.floor(Math.random() * 6000),
+                BCADGP: Math.floor(Math.random() * 5000)
+            }));
+        }
+
+        function buildAnalytics() {
+            buildKeyMetrics();
+            buildCharts();
+            buildInsights();
+            document.getElementById('analyticsContent').style.display = 'block';
+        }
+
+        function buildKeyMetrics() {
+            const statsGrid = document.getElementById('statsGrid');
+            
+            const totalReps = analyticsData.length;
+            //const activeReps = analyticsData.filter(rep => rep.IsRep === 1).length;
+            const activeReps = analyticsData.filter(rep => rep.IsRep == 1).length;
+            const inactiveReps = analyticsData.filter(rep => rep.IsRep == 0).length;
+            const totalGP = analyticsData.reduce((sum, rep) => sum + (rep.OverallTotalGP || 0), 0);
+            const avgGP = totalGP / totalReps;
+            const totalSeats = analyticsData.reduce((sum, rep) => sum + (rep.TotSeats || 0), 0);
+            const totalNewCustomers = analyticsData.reduce((sum, rep) => sum + (rep.TotNew || 0), 0);
+
+            const metrics = [
+                { value: totalReps.toLocaleString(), label: 'Total Representatives' },
+                { value: activeReps.toLocaleString(), label: 'Active Representatives' },
+                //{ value: `£${totalGP.toLocaleString()}`, label: 'Total GP Revenue' },
+                { value: `£${totalGP.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, label: 'Total GP Revenue' },
+                { value: `£${Math.round(avgGP).toLocaleString()}`, label: 'Average GP per Rep' },
+                { value: totalSeats.toLocaleString(), label: 'Total Seats Sold' },
+                { value: totalNewCustomers.toLocaleString(), label: 'New Customers' }
+            ];
+
+            statsGrid.innerHTML = metrics.map(metric => `
+                <div class="stat-card">
+                    <div class="stat-value">${metric.value}</div>
+                    <div class="stat-label">${metric.label}</div>
+                </div>
+            `).join('');
+        }
+
+        function buildCharts() {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
+
+            // 1. Top Representatives Chart
+            const topReps = [...analyticsData]
+                .sort((a, b) => (b.OverallTotalGP || 0) - (a.OverallTotalGP || 0))
+                .slice(0, 10);
+
+            charts.topReps = new Chart(document.getElementById('topRepsChart'), {
+                type: 'bar',
+                data: {
+                    labels: topReps.map(rep => rep.RepName),
+                    datasets: [{
+                        label: 'Total GP (£)',
+                        data: topReps.map(rep => rep.OverallTotalGP || 0),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '£' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. GP Categories Chart
+            const totalMDM = analyticsData.reduce((sum, rep) => sum + (rep.MDMGP || 0), 0);
+            const totalFresh = analyticsData.reduce((sum, rep) => sum + (rep.FreshGP || 0), 0);
+            const totalBCAD = analyticsData.reduce((sum, rep) => sum + (rep.BCADGP || 0), 0);
+            const totalGamma = analyticsData.reduce((sum, rep) => sum + (rep.GammaNewGP || 0), 0);
+            const totaliPecs = analyticsData.reduce((sum, rep) => sum + (rep.iPecsNewGP || 0), 0);
+            const total3CX = analyticsData.reduce((sum, rep) => sum + (rep['3CXNewGP'] || 0), 0);
+
+            charts.gpCategories = new Chart(document.getElementById('gpCategoriesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['MDM GP', 'Fresh GP', 'BCAD GP', 'Gamma GP', 'iPecs GP', '3CX GP'],
+                    datasets: [{
+                        data: [totalMDM, totalFresh, totalBCAD, totalGamma, totaliPecs, total3CX],
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 3. Team Performance Chart
+            const teamData = {};
+            analyticsData.forEach(rep => {
+                const team = rep.TeamName || 'Unknown';
+                if (!teamData[team]) {
+                    teamData[team] = { totalGP: 0, count: 0 };
+                }
+                teamData[team].totalGP += rep.OverallTotalGP || 0;
+                teamData[team].count += 1;
+            });
+
+            const teamLabels = Object.keys(teamData);
+            const teamTotalGP = teamLabels.map(team => teamData[team].totalGP);
+            const teamAvgGP = teamLabels.map(team => teamData[team].totalGP / teamData[team].count);
+
+            charts.teamPerformance = new Chart(document.getElementById('teamPerformanceChart'), {
+                type: 'bar',
+                data: {
+                    labels: teamLabels,
+                    datasets: [{
+                        label: 'Total GP (£)',
+                        data: teamTotalGP,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Average GP per Rep (£)',
+                        data: teamAvgGP,
+                        backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+
+            // 4. Rep Status Chart
+            const activeCount = analyticsData.filter(rep => rep.IsRep === 1).length;
+            const inactiveCount = analyticsData.filter(rep => rep.IsRep === 0).length;
+
+            charts.repStatus = new Chart(document.getElementById('repStatusChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Active Representatives', 'Inactive Representatives'],
+                    datasets: [{
+                        data: [activeCount, inactiveCount],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 5. Product Mix Chart (Seats)
+            const totalGammaSeats = analyticsData.reduce((sum, rep) => sum + (rep.Gamma_NEW_Seats || 0), 0);
+            const totaliPecsSeats = analyticsData.reduce((sum, rep) => sum + (rep.iPecs_NEW_Seats || 0), 0);
+            const total3CXSeats = analyticsData.reduce((sum, rep) => sum + (rep['3CXNewSeats'] || 0), 0);
+
+            charts.productMix = new Chart(document.getElementById('productMixChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Gamma Seats', 'iPecs Seats', '3CX Seats'],
+                    datasets: [{
+                        label: 'Total Seats Sold',
+                        data: [totalGammaSeats, totaliPecsSeats, total3CXSeats],
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // 6. Performance Trend (simulated)
+            const performanceData = analyticsData.map((rep, index) => ({
+                rep: rep.RepName,
+                performance: rep.OverallTotalGP || 0
+            })).sort((a, b) => b.performance - a.performance);
+
+            charts.performanceTrend = new Chart(document.getElementById('performanceTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: performanceData.slice(0, 10).map(item => item.rep),
+                    datasets: [{
+                        label: 'GP Performance (£)',
+                        data: performanceData.slice(0, 10).map(item => item.performance),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '£' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function buildInsights() {
+            const container = document.getElementById('insightsContainer');
+            
+            // Calculate insights
+            const topPerformer = [...analyticsData].sort((a, b) => (b.OverallTotalGP || 0) - (a.OverallTotalGP || 0))[0];
+            const avgGP = analyticsData.reduce((sum, rep) => sum + (rep.OverallTotalGP || 0), 0) / analyticsData.length;
+            const activeReps = analyticsData.filter(rep => rep.IsRep === 1);
+            const inactiveReps = analyticsData.filter(rep => rep.IsRep === 0);
+            
+            const teamPerformance = {};
+            analyticsData.forEach(rep => {
+                const team = rep.TeamName || 'Unknown';
+                if (!teamPerformance[team]) teamPerformance[team] = [];
+                teamPerformance[team].push(rep.OverallTotalGP || 0);
+            });
+            
+            const bestTeam = Object.keys(teamPerformance).reduce((best, team) => {
+                const teamAvg = teamPerformance[team].reduce((a, b) => a + b, 0) / teamPerformance[team].length;
+                const bestAvg = teamPerformance[best] ? teamPerformance[best].reduce((a, b) => a + b, 0) / teamPerformance[best].length : 0;
+                return teamAvg > bestAvg ? team : best;
+            });
+
+            const insights = [
+                {
+                    title: "Top Performer",
+                    content: `${topPerformer?.RepName || 'N/A'} leads with £${(topPerformer?.OverallTotalGP || 0).toLocaleString()} in total GP, significantly outperforming the average of £${Math.round(avgGP).toLocaleString()}.`
+                },
+                {
+                    title: "Team Leadership", 
+                    content: `Team ${bestTeam} shows the strongest average performance, indicating effective management and strategy implementation.`
+                },
+                {
+                    title: "Active vs Inactive Analysis",
+                    content: `${activeReps.length} active representatives generate the majority of revenue compared to ${inactiveReps.length} inactive ones, suggesting the importance of maintaining active status.`
+                },
+                {
+                    title: "Product Mix Opportunity",
+                    content: `Gamma and iPecs products show strong performance in seats sold, indicating market demand and potential areas for focused sales efforts.`
+                },
+                {
+                    title: "Performance Distribution", 
+                    content: `The top 20% of representatives likely generate 80% of total revenue, following the Pareto principle. Focus on supporting and replicating top performer strategies.`
+                },
+                {
+                    title: "Data Period Analysis",
+                    content: `Analysis based on ${analyticsData.length} representatives. ${Math.round((analyticsData.filter(rep => rep.IsRep === 1).length / analyticsData.length) * 100)}% are currently active, contributing to the overall performance metrics.`
+                }
+            ];
+
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-title">${insight.title}</div>
+                    <div>${insight.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function goBackToDashboard() {
+            // Try to close current tab and return to main dashboard
+            try {
+                // Clear the analytics data from localStorage
+                localStorage.removeItem('salesAnalyticsData');
+                
+                // Close current tab if it was opened by another window
+                if (window.opener) {
+                    window.close();
+                } else {
+                    // If not opened by another window, try to navigate back
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        // Last resort: redirect to main dashboard
+                        window.location.href = 'index.html';
+                    }
+                }
+            } catch (error) {
+                console.error('Error navigating back:', error);
+                // Fallback: show alert with instructions
+                alert('Please close this tab to return to the main dashboard, or navigate to index.html');
+            }
+        }
+
+        // Initialize analytics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnalytics();
+        });
+    </script>
+</body>
+</html>

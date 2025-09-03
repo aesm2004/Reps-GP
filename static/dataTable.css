@@ -194,7 +194,7 @@
         .rep-name-cell {
             cursor: pointer;
             position: relative;
-            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            background: linear-gradient(135deg,  #113d72 0%, #2596be) !important;
             color: white !important;
             font-weight: bold;
             transition: all 0.3s ease;

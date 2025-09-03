@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, render_template
 import pyodbc, os
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 # --- DEBUG_MODE = False  # Set to False for production
 
 # --- Database connection ---

@@ -2,8 +2,8 @@ from flask import Flask, jsonify, request, render_template
 import pyodbc, os
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-# --- DEBUG_MODE = True
-DEBUG_MODE = False  # Set to False for production
+DEBUG_MODE = True
+# --- DEBUG_MODE = False  # Set to False for production
 
 # --- Database connection ---
 DB_SERVER = os.environ.get('DB_SERVER', 'BC-SQL\\SAGE200')

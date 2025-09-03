@@ -1,4 +1,4 @@
- * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -107,6 +107,7 @@
             font-size: 1.2rem;
         }
 
+       
         .table-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -178,14 +179,75 @@
             background-color: rgba(248, 250, 252, 0.95);
         }
 
+        /* Enhanced row hover effect */
         tr:hover td {
             background-color: rgba(102, 126, 234, 0.1) !important;
-            cursor: pointer;
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         tr:hover td:first-child {
             background-color: rgba(102, 126, 234, 0.15) !important;
         }
+
+        /* Special RepName cell styling */
+        .rep-name-cell {
+            cursor: pointer;
+            position: relative;
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            color: white !important;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .rep-name-cell:hover {
+            background: linear-gradient(135deg, #764ba2, #f093fb) !important;
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Tooltip for RepName cell */
+
+        .rep-name-tooltip {
+    z-index: 9999;     /* float above the table */
+}
+
+        .rep-name-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 0%;
+            transform: none;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+            margin-left: 10px; /* adjust this value to push it right */
+            margin-top: 10px;
+        }
+
+        .rep-name-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .rep-name-cell:hover .rep-name-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+      
 
         .clickable-cell {
             cursor: pointer;
@@ -317,7 +379,7 @@
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-              .btn-green {
+        .btn-green {
             background: linear-gradient(135deg, #28a745, #218838);
         }
         .btn-green:hover {
@@ -325,6 +387,14 @@
             box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
         }
 
+        .btn-analytics {
+            background: linear-gradient(135deg, #f093fb, #f5576c) !important;
+        }
+        
+        .btn-analytics:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3) !important;
+        }
 
         .no-results {
             text-align: center;
@@ -347,15 +417,4 @@
             .header h1 {
                 font-size: 2rem;
             }
-
-        
-        
-        .btn-analytics {
-            background: linear-gradient(135deg, #f093fb, #f5576c) !important;
-        }
-        
-        .btn-analytics:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3) !important;
-        }
         }

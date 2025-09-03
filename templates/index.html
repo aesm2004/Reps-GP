@@ -2,26 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Data Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analytics Dashboard</title>
+	 <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-   
-<script src="{{ url_for('static', filename='main.js') }}"></script>
-
-
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <!-- Logo and Title Container -->
-          <div class="header-brand">
-    <img src="{{ url_for('static', filename='Barclay Digital Services Logo Full Colour.png') }}" 
-         alt="Barclay Digital Services" 
-         class="company-logo"
-         style="height: 40px; max-width: 200px;">
-    <h1>Sales Data Dashboard</h1>
-</div>
+            <div class="header-brand">
+                <h1>Sales Data Dashboard</h1>
+            </div>
             
             <div class="controls">
                 <div class="control-group">
@@ -76,8 +68,9 @@
     <script>
         let salesData = [];
         let filteredData = [];
+    
 
-        // Initialize date inputs with default values
+       // Initialize date inputs with default values
         document.addEventListener('DOMContentLoaded', function() {
             function formatDateLocal(date) {
                 const year = date.getFullYear();
@@ -100,8 +93,9 @@
             document.getElementById('searchInput').addEventListener('input', filterData);
         });
 
+
         async function loadData() {
-            const startDate = document.getElementById('startDate').value;
+              const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             const repStatus = document.getElementById('repStatus').value;
 
@@ -114,10 +108,7 @@
             document.getElementById('dataTable').style.display = 'none';
 
             try {
-                const basePath = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname;
-                const response = await fetch(`${basePath}/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`);
-
-                <!-- const response = await fetch(`/RepsGP/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`); -->
+                const response = await fetch(`/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -188,11 +179,20 @@
                         td.textContent = value || '';
                     }
                     
-                    // Make cells clickable (except RepName and TeamName)
-                    if (column !== 'RepName' && column !== 'TeamName' && column !== 'IsRep') {
-                        td.classList.add('clickable-cell');
-                        td.addEventListener('click', () => showDrillDown(row, column, value));
+                    // Special handling for RepName column - only this is clickable
+                    if (column === 'RepName') {
+                        td.classList.add('rep-name-cell');
+                        
+                        // Add tooltip
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'rep-name-tooltip';
+                        tooltip.textContent = 'Click here to view detailed breakdown';
+                        td.appendChild(tooltip);
+                        
+                        // Add click event for RepName drill-down
+                        td.addEventListener('click', () => showRepDrillDown(row));
                     }
+                    // All other cells are now non-clickable for drill-down
                     
                     tr.appendChild(td);
                 });
@@ -216,6 +216,99 @@
             }
             
             buildTable();
+        }
+
+        // New function specifically for RepName drill-down
+        function showRepDrillDown(row) {
+            const modal = document.getElementById('drillDownModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `Representative Overview - ${row.RepName}`;
+
+            // Create comprehensive rep overview
+            let content = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Representative Profile</h4>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 12px;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.5rem;">${row.RepName}</h3>
+                        <p style="margin: 5px 0;"><strong>Team:</strong> ${row.TeamName}</p>
+                        <p style="margin: 5px 0;"><strong>Status:</strong> ${row.IsRep ? 'Active Representative' : 'Inactive'}</p>
+                        <p style="margin: 5px 0;"><strong>Overall Total GP:</strong> £${typeof row.OverallTotalGP === 'number' ? row.OverallTotalGP.toLocaleString() : row.OverallTotalGP}</p>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Performance Summary</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; border-left: 4px solid #2596be;">
+                            <h5 style="color: #14568d; margin-bottom: 8px;">Primary GP Metrics</h5>
+                            <p><strong>MOB Final Total GP:</strong> £${typeof row.FinalGPTotal === 'number' ? row.FinalGPTotal.toLocaleString() : row.FinalGPTotal}</p>
+                             <p><strong>TELEPHONY Final Total GP:</strong> £${typeof row.LL_FinalGPTotal === 'number' ? row.LL_FinalGPTotal.toLocaleString() : row.LL_FinalGPTotal}</p>
+                              <p><strong>NO PROVIDER Total GP:</strong> £${typeof row.FinalNoProviderGP === 'number' ? row.FinalNoProviderGP.toLocaleString() : row.FinalNoProviderGP}</p>
+                               <p><strong>BDS IT Final Total GP:</strong> £${typeof row.FinalBDSIT/ITHardwareOnly === 'number' ? row.FinalBDSIT/ITHardwareOnly.toLocaleString() : row.FinalBDSIT/ITHardwareOnly}</p>
+                            <p><strong>Overall Total GP:</strong> £${typeof row.OverallTotalGP === 'number' ? row.OverallTotalGP.toLocaleString() : row.OverallTotalGP}</p>
+                        </div>
+                        <div style="background: #f0f8e8; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
+                            <h5 style="color: #1e7e34; margin-bottom: 8px;">Connection Stats</h5>
+                            <p><strong>NEW:</strong> ${row.TotNew}</p>
+                            <p><strong>RS:</strong> ${row.TotResign}</p>
+                            <p><strong>Total Connections:</strong> ${row.TotConnections}</p>
+                        </div>
+                        <div style="background: #fff0f5; padding: 15px; border-radius: 10px; border-left: 4px solid #f093fb;">
+                            <h5 style="color: #c73e91; margin-bottom: 8px;">Telephony</h5>
+                             <p><strong>Gamma NEW:</strong> ${row.Gamma_NEW_Seats}</p>
+                              <p><strong>Gamma RS:</strong> ${row.Gamma_RS_Seats}</p>
+                               <p><strong>iPecs NEW:</strong> ${row.iPecs_NEW_Seats}</p>
+                                <p><strong>iPecs RS:</strong> ${row.iPecs_RS_Seats}</p>
+                                 <p><strong>3CX NEW:</strong> ${row['3CXNewSeats']}</p>
+                                  <p><strong>3CX RS:</strong> ${row['3CXRSSeats']}</p>
+                            <p><strong>Total Seats:</strong> ${row.TotSeats}</p>
+                            <p><strong>LL Final GP:</strong> £${typeof row.LL_FinalGPTotal === 'number' ? row.LL_FinalGPTotal.toLocaleString() : row.LL_FinalGPTotal}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Detailed Metrics Breakdown</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto;">
+            `;
+
+            // Add all metrics in smaller cards
+            const allMetrics = [
+                'SumGP','ReferralGP','Addition','Reversal','GPTotal','OverspendGP','DiscretionaryGP', 'OtherDisctrtionaryGP',
+                'MDMGP','FreshGP','BCADGP','FinalGPTotal',  'TotNew', 'TotResign', 'TotConnections','LL_SumGP', 'LL_Addition',
+                'LL_Reversal','LLOtherDisctrtionaryGP','GammaNewGP', 'GammaRSGP','iPecsNewGP', 'iPecsRSGP', '3CXNewGP','3CXRSGP',
+                'Telephony_Undefined','LL_FinalGPTotal', 'Gamma_NEW_Seats', 'Gamma_RS_Seats','iPecs_NEW_Seats','iPecs_RS_Seats', 
+                '3CXNewSeats', '3CXRSSeats',  'TotSeats','NoProviderGP','NoProviderDealAddition', 'NoProviderDealReversal',
+                 'FinalNoProviderGP','BDSIT/ITHardwareOnlyGP', 'BDSIT_DealAddition','BDSIT_DealReversal', 
+                'FinalBDSIT/ITHardwareOnly', 'OverallTotalGP'
+            ];
+            
+            allMetrics.forEach(metric => {
+                if (row[metric] !== undefined) {
+                    const metricValue = typeof row[metric] === 'number' ? row[metric].toLocaleString() : row[metric];
+                    
+                    content += `
+                        <div style="background: white; border: 1px solid #e1e5e9; padding: 10px; border-radius: 8px; text-align: center; transition: all 0.2s ease; cursor: pointer;" 
+                             onclick="showDrillDown(${JSON.stringify(row).replace(/"/g, '&quot;')}, '${metric}', ${JSON.stringify(row[metric])})">
+                            <div style="font-size: 0.7rem; margin-bottom: 4px; color: #666; font-weight: 500;">${metric}</div>
+                            <div style="font-size: 0.9rem; font-weight: bold; color: #333;">${metricValue}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            content += `
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 10px; text-align: center; color: #666; font-size: 0.9rem;">
+                    💡 Click on any metric above to see detailed breakdown
+                </div>
+            `;
+
+            modalContent.innerHTML = content;
+            modal.style.display = 'block';
         }
 
         function showDrillDown(row, column, value) {
@@ -345,28 +438,13 @@
                     endDate: endDate,
                     repStatus: repStatus
                 },
-                
                 timestamp: new Date().toISOString()
             };
             
-            // Save to localStorage for analytics page to access
-            try {
-                localStorage.setItem('salesAnalyticsData', JSON.stringify(analyticsDataPackage));
-                
-                // Open analytics page in new tab
-                const analyticsWindow = window.open('analytics.html', '_blank');
-                
-                // Check if popup was blocked
-                if (!analyticsWindow) {
-                    alert('Popup blocked! Please allow popups for this site to view analytics, or open analytics.html manually.');
-                }
-            } catch (error) {
-                console.error('Error saving data for analytics:', error);
-                alert('Error preparing analytics data. Please try again.');
-            }
+            // For demo purposes, show alert instead of localStorage
+            alert('Analytics feature would open here with current data filters applied!');
+            console.log('Analytics data package:', analyticsDataPackage);
         }
     </script>
- 
-    
 </body>
 </html>

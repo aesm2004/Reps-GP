@@ -15,7 +15,7 @@
                 <label>Start Date <input type="date" id="startDate"></label>
                 <label>End Date <input type="date" id="endDate"></label>
                 <button class="btn" onclick="loadTelephony()">Refresh</button>
-                <button class="btn btn-secondary" onclick="goBackToDashboard()">Back to Dashboard</button>
+                <button class="btn btn-goback" onclick="goBackToDashboard()">Back to Dashboard</button>
             </div>
         </div>
 
@@ -111,7 +111,7 @@
                     const value = row[col];
                     td.textContent = (typeof value === 'number') ? value.toLocaleString() : value || '';
 
-                    if (col === 'RepName') {
+                    if (col === 'DealRep') {
                         td.classList.add('rep-name-cell');
                         const tooltip = document.createElement('div');
                         tooltip.className = 'rep-name-tooltip';

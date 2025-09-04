@@ -399,6 +399,10 @@
             background: linear-gradient(135deg, #f29317, #e8a251);
         }
 
+        .btn-goback {
+            background: linear-gradient(135deg, #292f31, #2596be);
+        }
+
         .btn-green {
             background: linear-gradient(135deg, #28a745, #218838);
         }

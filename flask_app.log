@@ -1,0 +1,170 @@
+2025-09-04 09:23:59,039 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 09:23:59,039 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 09:23:59,042 - INFO - Running in DEBUG mode - local development
+2025-09-04 09:23:59,046 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 09:23:59,047 - INFO - Starting Flask development server...
+2025-09-04 09:23:59,135 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-04 09:23:59,135 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-04 09:23:59,140 - INFO -  * Restarting with stat
+2025-09-04 09:23:59,408 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 09:23:59,409 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 09:23:59,412 - INFO - Running in DEBUG mode - local development
+2025-09-04 09:23:59,416 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 09:23:59,417 - INFO - Starting Flask development server...
+2025-09-04 09:23:59,434 - WARNING -  * Debugger is active!
+2025-09-04 09:23:59,438 - INFO -  * Debugger PIN: 119-866-599
+2025-09-04 09:24:24,773 - INFO - Home route accessed
+2025-09-04 09:24:24,787 - INFO - 127.0.0.1 - - [04/Sep/2025 09:24:24] "GET / HTTP/1.1" 200 -
+2025-09-04 09:24:24,877 - INFO - 127.0.0.1 - - [04/Sep/2025 09:24:24] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 09:24:25,037 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 09:24:25,037 - INFO - Attempting database connection...
+2025-09-04 09:24:25,080 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 09:24:25,080 - INFO - 127.0.0.1 - - [04/Sep/2025 09:24:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 09:24:25,547 - INFO - Database connection successful
+2025-09-04 09:24:25,548 - INFO - Executing stored procedure...
+2025-09-04 09:24:29,574 - INFO - Successfully retrieved 60 rows
+2025-09-04 09:24:29,576 - INFO - 127.0.0.1 - - [04/Sep/2025 09:24:29] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 09:32:20,941 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 09:32:20,942 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 09:32:20,944 - INFO - Running in DEBUG mode - local development
+2025-09-04 09:32:20,949 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 09:32:20,950 - INFO - Starting Flask development server...
+2025-09-04 09:32:20,976 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-04 09:32:20,977 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-04 09:32:20,978 - INFO -  * Restarting with stat
+2025-09-04 09:32:21,237 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 09:32:21,238 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 09:32:21,240 - INFO - Running in DEBUG mode - local development
+2025-09-04 09:32:21,246 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 09:32:21,246 - INFO - Starting Flask development server...
+2025-09-04 09:32:21,262 - WARNING -  * Debugger is active!
+2025-09-04 09:32:21,265 - INFO -  * Debugger PIN: 119-866-599
+2025-09-04 09:32:33,686 - INFO - Home route accessed
+2025-09-04 09:32:33,694 - INFO - 127.0.0.1 - - [04/Sep/2025 09:32:33] "GET / HTTP/1.1" 200 -
+2025-09-04 09:32:33,783 - INFO - 127.0.0.1 - - [04/Sep/2025 09:32:33] "[36mGET /static/dataTable.css HTTP/1.1[0m" 304 -
+2025-09-04 09:32:33,876 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 09:32:33,877 - INFO - Attempting database connection...
+2025-09-04 09:32:34,396 - INFO - Database connection successful
+2025-09-04 09:32:34,397 - INFO - Executing stored procedure...
+2025-09-04 09:32:38,937 - INFO - Successfully retrieved 60 rows
+2025-09-04 09:32:38,940 - INFO - 127.0.0.1 - - [04/Sep/2025 09:32:38] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 09:33:05,513 - INFO -  * Detected change in 'C:\\sales_project_starter\\app.py', reloading
+2025-09-04 09:33:05,548 - INFO -  * Restarting with stat
+2025-09-04 09:38:33,735 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 09:38:33,735 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 09:38:33,738 - INFO - Running in DEBUG mode - local development
+2025-09-04 09:38:33,743 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 09:38:33,743 - INFO - Starting Flask development server...
+2025-09-04 09:38:33,768 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-04 09:38:33,769 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-04 09:38:33,770 - INFO -  * Restarting with stat
+2025-09-04 09:38:34,026 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 09:38:34,026 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 09:38:34,029 - INFO - Running in DEBUG mode - local development
+2025-09-04 09:38:34,033 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 09:38:34,033 - INFO - Starting Flask development server...
+2025-09-04 09:38:34,050 - WARNING -  * Debugger is active!
+2025-09-04 09:38:34,053 - INFO -  * Debugger PIN: 119-866-599
+2025-09-04 09:38:43,627 - INFO - Home route accessed
+2025-09-04 09:38:43,637 - INFO - 127.0.0.1 - - [04/Sep/2025 09:38:43] "GET / HTTP/1.1" 200 -
+2025-09-04 09:38:43,704 - INFO - 127.0.0.1 - - [04/Sep/2025 09:38:43] "[36mGET /static/dataTable.css HTTP/1.1[0m" 304 -
+2025-09-04 09:38:43,857 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 09:38:43,858 - INFO - Attempting database connection...
+2025-09-04 09:38:44,342 - INFO - Database connection successful
+2025-09-04 09:38:44,342 - INFO - Executing stored procedure...
+2025-09-04 09:38:44,865 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 09:38:44,865 - INFO - 127.0.0.1 - - [04/Sep/2025 09:38:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 09:38:49,941 - ERROR - Database error: ('40001', '[40001] [Microsoft][ODBC SQL Server Driver][SQL Server]Transaction (Process ID 63) was deadlocked on lock | communication buffer resources with another process and has been chosen as the deadlock victim. Rerun the transaction. (1205) (SQLExecDirectW); [40001] [Microsoft][ODBC SQL Server Driver][SQL Server]Warning: Null value is eliminated by an aggregate or other SET operation. (8153)')
+2025-09-04 09:38:49,975 - INFO - 127.0.0.1 - - [04/Sep/2025 09:38:49] "[35m[1mGET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1[0m" 500 -
+2025-09-04 09:42:49,498 - INFO -  * Detected change in 'C:\\sales_project_starter\\app.py', reloading
+2025-09-04 09:42:49,535 - INFO -  * Restarting with stat
+2025-09-04 10:16:32,713 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 10:16:32,713 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 10:16:32,716 - INFO - Running in DEBUG mode - local development
+2025-09-04 10:16:32,720 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 10:16:32,720 - INFO - Starting Flask development server...
+2025-09-04 10:16:32,745 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-04 10:16:32,745 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-04 10:16:32,747 - INFO -  * Restarting with stat
+2025-09-04 10:16:33,012 - INFO - Starting Flask app with DEBUG_MODE=True
+2025-09-04 10:16:33,012 - INFO - Database server: BC-SQL\SAGE200
+2025-09-04 10:16:33,014 - INFO - Running in DEBUG mode - local development
+2025-09-04 10:16:33,020 - INFO - Application configured. DEBUG_MODE: True
+2025-09-04 10:16:33,020 - INFO - Starting Flask development server...
+2025-09-04 10:16:33,035 - WARNING -  * Debugger is active!
+2025-09-04 10:16:33,038 - INFO -  * Debugger PIN: 119-866-599
+2025-09-04 10:16:44,605 - INFO - Home route accessed
+2025-09-04 10:16:44,613 - INFO - 127.0.0.1 - - [04/Sep/2025 10:16:44] "GET / HTTP/1.1" 200 -
+2025-09-04 10:16:44,679 - INFO - 127.0.0.1 - - [04/Sep/2025 10:16:44] "[36mGET /static/dataTable.css HTTP/1.1[0m" 304 -
+2025-09-04 10:16:44,820 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 10:16:44,821 - INFO - Attempting database connection...
+2025-09-04 10:16:45,290 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 10:16:45,290 - INFO - 127.0.0.1 - - [04/Sep/2025 10:16:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 10:16:45,304 - INFO - Database connection successful
+2025-09-04 10:16:45,305 - INFO - Executing stored procedure...
+2025-09-04 10:16:49,179 - INFO - Successfully retrieved 60 rows
+2025-09-04 10:16:49,180 - INFO - 127.0.0.1 - - [04/Sep/2025 10:16:49] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 10:17:41,251 - INFO - Home route accessed
+2025-09-04 10:17:41,265 - INFO - 127.0.0.1 - - [04/Sep/2025 10:17:41] "GET / HTTP/1.1" 200 -
+2025-09-04 10:17:41,313 - INFO - 127.0.0.1 - - [04/Sep/2025 10:17:41] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 10:17:41,657 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 10:17:41,657 - INFO - Attempting database connection...
+2025-09-04 10:17:41,659 - INFO - Database connection successful
+2025-09-04 10:17:41,659 - INFO - Executing stored procedure...
+2025-09-04 10:17:41,697 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 10:17:41,698 - INFO - 127.0.0.1 - - [04/Sep/2025 10:17:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 10:17:45,709 - INFO - Successfully retrieved 60 rows
+2025-09-04 10:17:45,712 - INFO - 127.0.0.1 - - [04/Sep/2025 10:17:45] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 10:18:37,469 - INFO - Home route accessed
+2025-09-04 10:18:37,475 - INFO - 127.0.0.1 - - [04/Sep/2025 10:18:37] "GET / HTTP/1.1" 200 -
+2025-09-04 10:18:37,508 - INFO - 127.0.0.1 - - [04/Sep/2025 10:18:37] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 10:18:37,896 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 10:18:37,896 - INFO - Attempting database connection...
+2025-09-04 10:18:37,897 - INFO - Database connection successful
+2025-09-04 10:18:37,897 - INFO - Executing stored procedure...
+2025-09-04 10:18:37,950 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 10:18:37,951 - INFO - 127.0.0.1 - - [04/Sep/2025 10:18:37] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 10:18:41,820 - INFO - Successfully retrieved 60 rows
+2025-09-04 10:18:41,823 - INFO - 127.0.0.1 - - [04/Sep/2025 10:18:41] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 10:20:37,110 - INFO - Home route accessed
+2025-09-04 10:20:37,118 - INFO - 127.0.0.1 - - [04/Sep/2025 10:20:37] "GET / HTTP/1.1" 200 -
+2025-09-04 10:20:37,151 - INFO - 127.0.0.1 - - [04/Sep/2025 10:20:37] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 10:20:37,494 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 10:20:37,494 - INFO - Attempting database connection...
+2025-09-04 10:20:37,537 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 10:20:37,538 - INFO - 127.0.0.1 - - [04/Sep/2025 10:20:37] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 10:20:37,795 - INFO - Database connection successful
+2025-09-04 10:20:37,796 - INFO - Executing stored procedure...
+2025-09-04 10:20:41,811 - INFO - Successfully retrieved 60 rows
+2025-09-04 10:20:41,827 - INFO - 127.0.0.1 - - [04/Sep/2025 10:20:41] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 10:23:12,200 - INFO - Home route accessed
+2025-09-04 10:23:12,208 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:12] "GET / HTTP/1.1" 200 -
+2025-09-04 10:23:12,237 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:12] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 10:23:12,599 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 10:23:12,600 - INFO - Attempting database connection...
+2025-09-04 10:23:12,648 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 10:23:12,649 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 10:23:12,895 - INFO - Database connection successful
+2025-09-04 10:23:12,896 - INFO - Executing stored procedure...
+2025-09-04 10:23:16,897 - INFO - Successfully retrieved 60 rows
+2025-09-04 10:23:16,899 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:16] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 10:23:59,267 - INFO - Home route accessed
+2025-09-04 10:23:59,276 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:59] "GET / HTTP/1.1" 200 -
+2025-09-04 10:23:59,329 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:59] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 10:23:59,512 - INFO - Home route accessed
+2025-09-04 10:23:59,512 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:59] "GET / HTTP/1.1" 200 -
+2025-09-04 10:23:59,547 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:59] "GET /static/dataTable.css HTTP/1.1" 200 -
+2025-09-04 10:23:59,795 - INFO - API request - start: 2025-09-01, end: 2025-09-04, rep: 1
+2025-09-04 10:23:59,797 - INFO - Attempting database connection...
+2025-09-04 10:23:59,798 - INFO - Database connection successful
+2025-09-04 10:23:59,798 - INFO - Executing stored procedure...
+2025-09-04 10:23:59,837 - WARNING - 404 error: http://127.0.0.1:5000/favicon.ico
+2025-09-04 10:23:59,838 - INFO - 127.0.0.1 - - [04/Sep/2025 10:23:59] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-04 10:24:04,551 - INFO - Successfully retrieved 60 rows
+2025-09-04 10:24:04,553 - INFO - 127.0.0.1 - - [04/Sep/2025 10:24:04] "GET /api/salesdata?start=2025-09-01&end=2025-09-04&rep=1 HTTP/1.1" 200 -
+2025-09-04 10:25:59,913 - INFO -  * Detected change in 'C:\\sales_project_starter\\app.py', reloading
+2025-09-04 10:25:59,949 - INFO -  * Restarting with stat

@@ -2,8 +2,7 @@ from flask import Flask, jsonify, request, render_template
 import pyodbc, os
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-DEBUG_MODE = False
-# --- DEBUG_MODE = False  # Set to False for production
+DEBUG_MODE = False  # False for production
 
 # --- Database connection ---
 DB_SERVER = os.environ.get('DB_SERVER', 'BC-SQL\\SAGE200')
@@ -24,7 +23,7 @@ app = Flask(
     __name__,
     template_folder='templates',
     static_folder='static',
-    static_url_path='/RepsGP/static'
+    static_url_path='/RepsGP/static'  # ensures /RepsGP/static works in IIS
 )
 app.config['APPLICATION_ROOT'] = '/RepsGP'
 
@@ -80,10 +79,7 @@ def analytics():
 if not DEBUG_MODE:
     application = DispatcherMiddleware(None, {'/RepsGP': app})
 
-
 # --- Local development ---
 if __name__ == '__main__' or DEBUG_MODE:
     print("Running Flask in local debug mode on http://127.0.0.1:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-    # Access via http://localhost:5000/RepsGP/

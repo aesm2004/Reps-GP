@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Analytics Dashboard</title>
-	 <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>   
+    <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -14,7 +14,6 @@
             <div class="header-brand">
                 <h1>Sales Data Dashboard</h1>
             </div>
-            
             <div class="controls">
                 <div class="control-group">
                     <label for="startDate">Start Date</label>
@@ -54,7 +53,6 @@
         </div>
     </div>
 
-    <!-- Modal for drill-down data -->
     <div id="drillDownModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -66,11 +64,14 @@
     </div>
 
     <script>
+        // -----------------------------
+        // BASE_URL: dynamically reflects Flask app root
+        // -----------------------------
+        const BASE_URL = '{{ request.script_root }}' || '';
+
         let salesData = [];
         let filteredData = [];
-    
 
-       // Initialize date inputs with default values
         document.addEventListener('DOMContentLoaded', function() {
             function formatDateLocal(date) {
                 const year = date.getFullYear();
@@ -78,24 +79,24 @@
                 const day = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
             }
-            
+
             const today = new Date();
             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            
+
             document.getElementById('startDate').value = formatDateLocal(firstDayOfMonth);
             document.getElementById('endDate').value = formatDateLocal(today);
             document.getElementById('repStatus').value = '1';
-            
-            // Load initial data
+
             loadData();
-            
-            // Add search functionality
+
             document.getElementById('searchInput').addEventListener('input', filterData);
         });
 
-
+        // -----------------------------
+        // Load data from Flask API
+        // -----------------------------
         async function loadData() {
-              const startDate = document.getElementById('startDate').value;
+            const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             const repStatus = document.getElementById('repStatus').value;
 
@@ -108,14 +109,14 @@
             document.getElementById('dataTable').style.display = 'none';
 
             try {
-                const response = await fetch(`/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`);
+                const response = await fetch(`${BASE_URL}/api/salesdata?start=${startDate}&end=${endDate}&rep=${repStatus}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 salesData = await response.json();
                 filteredData = [...salesData];
-                
+
                 if (salesData.length > 0) {
                     buildTable();
                 } else {
@@ -127,6 +128,9 @@
             }
         }
 
+        // -----------------------------
+        // Build table from filteredData
+        // -----------------------------
         function buildTable() {
             if (filteredData.length === 0) {
                 document.getElementById('loadingMessage').innerHTML = '<div class="no-results">No results found</div>';
@@ -138,11 +142,9 @@
             const header = document.getElementById('tableHeader');
             const body = document.getElementById('tableBody');
 
-            // Clear existing content
             header.innerHTML = '';
             body.innerHTML = '';
 
-            // Define the specific column order
             const columns = [
                 'RepName', 'TeamName', 'IsRep', 'SumGP', 'ReferralGP', 'Addition', 'Reversal', 'GPTotal', 
                 'OverspendGP', 'DiscretionaryGP', 'OtherDisctrtionaryGP', 'MDMGP', 'FreshGP', 'BCADGP', 
@@ -156,47 +158,31 @@
             ];
 
             const headerRow = document.createElement('tr');
-            
-            columns.forEach(column => {
+            columns.forEach(col => {
                 const th = document.createElement('th');
-                th.textContent = column;
+                th.textContent = col;
                 headerRow.appendChild(th);
             });
             header.appendChild(headerRow);
 
-            // Build body
-            filteredData.forEach((row, rowIndex) => {
+            filteredData.forEach(row => {
                 const tr = document.createElement('tr');
-                
-                columns.forEach((column, colIndex) => {
+                columns.forEach(col => {
                     const td = document.createElement('td');
-                    const value = row[column];
-                    
-                    // Format numbers with commas
-                    if (typeof value === 'number' && !isNaN(value)) {
-                        td.textContent = value.toLocaleString();
-                    } else {
-                        td.textContent = value || '';
-                    }
-                    
-                    // Special handling for RepName column - only this is clickable
-                    if (column === 'RepName') {
+                    const value = row[col];
+                    td.textContent = (typeof value === 'number') ? value.toLocaleString() : value || '';
+
+                    if (col === 'RepName') {
                         td.classList.add('rep-name-cell');
-                        
-                        // Add tooltip
                         const tooltip = document.createElement('div');
                         tooltip.className = 'rep-name-tooltip';
                         tooltip.textContent = 'Click here to view detailed breakdown';
                         td.appendChild(tooltip);
-                        
-                        // Add click event for RepName drill-down
                         td.addEventListener('click', () => showRepDrillDown(row));
                     }
-                    // All other cells are now non-clickable for drill-down
-                    
+
                     tr.appendChild(td);
                 });
-                
                 body.appendChild(tr);
             });
 
@@ -204,21 +190,20 @@
             document.getElementById('dataTable').style.display = 'table';
         }
 
+        // -----------------------------
+        // Filter table
+        // -----------------------------
         function filterData() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            if (searchTerm === '') {
-                filteredData = [...salesData];
-            } else {
-                filteredData = salesData.filter(row => 
-                    row.RepName && row.RepName.toLowerCase().includes(searchTerm)
-                );
-            }
-            
+            filteredData = searchTerm === '' 
+                ? [...salesData] 
+                : salesData.filter(row => row.RepName && row.RepName.toLowerCase().includes(searchTerm));
             buildTable();
         }
 
-        // New function specifically for RepName drill-down
+        // -----------------------------
+        // Drill-down modal
+        // -----------------------------
         function showRepDrillDown(row) {
             const modal = document.getElementById('drillDownModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -226,7 +211,8 @@
 
             modalTitle.textContent = `Representative Overview - ${row.RepName}`;
 
-            // Create comprehensive rep overview
+// desde aqui
+  // Create comprehensive rep overview
             let content = `
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: #667eea; margin-bottom: 10px;">Representative Profile</h4>
@@ -243,7 +229,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; border-left: 4px solid #2596be;">
                             <h5 style="color: #14568d; margin-bottom: 8px;">Primary GP Metrics</h5>
-                            <p><strong>Mob Tot. GP:</strong> £${typeof row.FinalGPTotal === 'number' ? row.FinalGPTotal.toLocaleString() : row.FinalGPTotal}</p>
+                          <p><strong>Mob Tot. GP:</strong> £${typeof row.FinalGPTotal === 'number' ? row.FinalGPTotal.toLocaleString() : row.FinalGPTotal}</p>
                             <p><strong>Tele. Tot. GP:</strong> £${typeof row.LL_FinalGPTotal === 'number' ? row.LL_FinalGPTotal.toLocaleString() : row.LL_FinalGPTotal}</p>
                             <p><strong>No Prov. Tot. GP:</strong> £${typeof row.FinalNoProviderGP === 'number' ? row.FinalNoProviderGP.toLocaleString() : row.FinalNoProviderGP}</p>
                             <p><strong>BDS IT Tot. GP:</strong> £${typeof row['FinalBDSIT/ITHardwareOnly'] === 'number' ? row['FinalBDSIT/ITHardwareOnly'].toLocaleString() : row['FinalBDSIT/ITHardwareOnly']}</p>
@@ -251,13 +237,13 @@
                         </div>
                         <div style="background: #f0f8e8; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
                             <h5 style="color: #1e7e34; margin-bottom: 8px;">Connection Stats</h5>
-                            <p><strong>NEW:</strong> ${row.TotNew}</p>
+                                <p><strong>NEW:</strong> ${row.TotNew}</p>
                             <p><strong>RS:</strong> ${row.TotResign}</p>
                             <p><strong>Total Connections:</strong> ${row.TotConnections}</p>
                         </div>
                         <div style="background: #fff0f5; padding: 15px; border-radius: 10px; border-left: 4px solid #f093fb;">
                             <h5 style="color: #c73e91; margin-bottom: 8px;">Telephony</h5>
-                             <p><strong>Gamma NEW:</strong> ${row.Gamma_NEW_Seats}</p>
+                              <p><strong>Gamma NEW:</strong> ${row.Gamma_NEW_Seats}</p>
                               <p><strong>Gamma RS:</strong> ${row.Gamma_RS_Seats}</p>
                                <p><strong>iPecs NEW:</strong> ${row.iPecs_NEW_Seats}</p>
                                 <p><strong>iPecs RS:</strong> ${row.iPecs_RS_Seats}</p>
@@ -311,92 +297,37 @@
             modal.style.display = 'block';
         }
 
-        function showDrillDown(row, column, value) {
-            const modal = document.getElementById('drillDownModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
 
-            modalTitle.textContent = `${column} Details - ${row.RepName}`;
 
-            // Create detailed view
-            let content = `
-                <div style="margin-bottom: 20px;">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">Selected Value</h4>
-                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 15px; border-radius: 12px; font-size: 1.2rem; font-weight: bold;">
-                        ${column}: ${typeof value === 'number' ? value.toLocaleString() : value}
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">Representative Information</h4>
-                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border-left: 4px solid #667eea;">
-                        <p><strong>Rep Name:</strong> ${row.RepName}</p>
-                        <p><strong>Team:</strong> ${row.TeamName}</p>
-                        <p><strong>Status:</strong> ${row.IsRep ? 'Active' : 'Inactive'}</p>
-                    </div>
-                </div>
+//hasta aqui
 
-                <div>
-                    <h4 style="color: #667eea; margin-bottom: 10px;">Related Metrics</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-            `;
 
-            // Add all specified metrics in cards
-            const keyMetrics = [
-                'SumGP','ReferralGP','Addition','Reversal','GPTotal','OverspendGP','DiscretionaryGP', 'OtherDisctrtionaryGP',
-                'MDMGP','FreshGP','BCADGP','FinalGPTotal',  'TotNew', 'TotResign', 'TotConnections','LL_SumGP', 'LL_Addition',
-                'LL_Reversal','LLOtherDisctrtionaryGP','GammaNewGP', 'GammaRSGP','iPecsNewGP', 'iPecsRSGP', '3CXNewGP','3CXRSGP',
-                'Telephony_Undefined','LL_FinalGPTotal', 'Gamma_NEW_Seats', 'Gamma_RS_Seats','iPecs_NEW_Seats','iPecs_RS_Seats', 
-                '3CXNewSeats', '3CXRSSeats',  'TotSeats','NoProviderGP','NoProviderDealAddition', 'NoProviderDealReversal',
-                 'FinalNoProviderGP','BDSIT/ITHardwareOnlyGP', 'BDSIT_DealAddition','BDSIT_DealReversal', 
-                'FinalBDSIT/ITHardwareOnly', 'OverallTotalGP'
-            ];
-            
-            keyMetrics.forEach(metric => {
-                if (row[metric] !== undefined) {
-                    const metricValue = typeof row[metric] === 'number' ? row[metric].toLocaleString() : row[metric];
-                    const isSelectedColumn = metric === column;
-                    const cardStyle = isSelectedColumn 
-                        ? 'background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none;' 
-                        : 'background: white; border: 1px solid #e1e5e9; color: #333;';
-                    
-                    content += `
-                        <div style="${cardStyle} padding: 12px; border-radius: 8px; text-align: center; transition: all 0.2s ease;">
-                            <div style="font-size: 0.75rem; margin-bottom: 5px; opacity: ${isSelectedColumn ? '0.9' : '0.7'};">${metric}</div>
-                            <div style="font-size: 1rem; font-weight: bold;">${metricValue}</div>
-                        </div>
-                    `;
-                }
-            });
+            //let content = `<div style="padding:20px;">`;
+            //for (let key in row) {
+                //const value = (typeof row[key] === 'number') ? row[key].toLocaleString() : row[key];
+                //content += `<p><strong>${key}:</strong> ${value}</p>`;
+            //}
+            //content += `</div>`;
 
-            content += `
-                    </div>
-                </div>
-            `;
-
-            modalContent.innerHTML = content;
-            modal.style.display = 'block';
-        }
+            //modalContent.innerHTML = content;
+            //modal.style.display = 'block';
+        //}
 
         function closeModal() {
             document.getElementById('drillDownModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('drillDownModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+        window.addEventListener('click', e => {
+            if (e.target === document.getElementById('drillDownModal')) closeModal();
         });
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
         });
 
+        // -----------------------------
+        // Export functions
+        // -----------------------------
         function exportTableToExcel() {
             const table = document.getElementById("dataTable");
             const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
@@ -413,8 +344,7 @@
                 }
                 csv.push(rowData.join(","));
             }
-            const csvString = csv.join("\n");
-            const blob = new Blob([csvString], { type: "text/csv" });
+            const blob = new Blob([csv.join("\n")], { type: "text/csv" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = "sales_data.csv";
@@ -423,25 +353,20 @@
             document.body.removeChild(link);
         }
 
+        // -----------------------------
+        // Analytics
+        // -----------------------------
         function openAnalytics() {
-            // Get current filter settings
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const repStatus = document.getElementById('repStatus').value;
-            
-            // Prepare data package for analytics
             const analyticsDataPackage = {
-                data: filteredData, // Current filtered data
-                originalData: salesData, // Complete dataset
+                data: filteredData,
+                originalData: salesData,
                 filters: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    repStatus: repStatus
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value,
+                    repStatus: document.getElementById('repStatus').value
                 },
                 timestamp: new Date().toISOString()
             };
-            
-            // For demo purposes, show alert instead of localStorage
             alert('Analytics feature would open here with current data filters applied!');
             console.log('Analytics data package:', analyticsDataPackage);
         }

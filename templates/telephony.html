@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telephony Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Telephony Data Dashboard</h1>
+            <div class="controls">
+                <label>Start Date <input type="date" id="startDate"></label>
+                <label>End Date <input type="date" id="endDate"></label>
+                <button class="btn" onclick="loadTelephony()">Refresh</button>
+                <button class="btn btn-secondary" onclick="goBackToDashboard()">Back to Dashboard</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingMessage" class="loading">Loading data...</div>
+            <table id="dataTable" style="display: none;">
+                <thead id="tableHeader"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = '{{ request.script_root }}' || '';
+
+        let salesData = [];
+        let filteredData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            function formatDateLocal(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+             document.getElementById('startDate').value = formatDateLocal(firstDay);
+            document.getElementById('endDate').value = formatDateLocal(today);
+
+            loadTelephony();
+        });
+
+        async function loadTelephony() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('dataTable').style.display = 'none';
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/telephony?start=${startDate}&end=${endDate}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                salesData = await response.json();
+                filteredData = [...salesData];
+
+                if (salesData.length > 0) {
+                    buildTableTelephony();
+                } else {
+                    document.getElementById('loadingMessage').innerText = "No data found";
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingMessage').innerText = "Error loading data";
+            }
+        }
+
+        // Build table from filteredData with fixed column order
+        function buildTableTelephony() {
+            if (filteredData.length === 0) {
+                document.getElementById('loadingMessage').innerHTML = '<div class="no-results">No results found</div>';
+                document.getElementById('dataTable').style.display = 'none';
+                return;
+            }
+
+            const header = document.getElementById('tableHeader');
+            const body = document.getElementById('tableBody');
+            header.innerHTML = '';
+            body.innerHTML = '';
+
+            const columns = [
+                'DealRep', 'Gamma_NEW_Seats', 'Gamma_RS_Seats', 'iPecs_NEW_Seats', 'iPecs_RS_Seats', 
+                '3CXNewSeats', '3CXRSSeats', 'TotSeats',
+                'Gamma_NEW_GP', 'Gamma_RS_GP', 'iPECS_NEW_GP', 'iPECS_RS_GP',
+                '3CX_NEW_GP', '3CX_RS_GP', 'Undefined_GP', 'DealTotalGP'
+            ];
+
+            const headerRow = document.createElement('tr');
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            header.appendChild(headerRow);
+
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                columns.forEach(col => {
+                    const td = document.createElement('td');
+                    const value = row[col];
+                    td.textContent = (typeof value === 'number') ? value.toLocaleString() : value || '';
+
+                    if (col === 'RepName') {
+                        td.classList.add('rep-name-cell');
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'rep-name-tooltip';
+                        tooltip.textContent = 'Click here to view detailed breakdown';
+                        td.appendChild(tooltip);
+                        td.addEventListener('click', () => showRepDrillDown(row));
+                    }
+
+                    tr.appendChild(td);
+                });
+                body.appendChild(tr);
+            });
+
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('dataTable').style.display = 'table';
+        }
+
+        function goBackToDashboard() {
+            if (window.opener) {
+                window.close();
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // placeholder if you want to add drilldowns later
+        function showRepDrillDown(row) {
+            alert("Drilldown for rep: " + (row.RepName || row.DealRep));
+        }
+    </script>
+</body>
+</html>

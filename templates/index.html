@@ -32,6 +32,7 @@
                     </select>
                 </div>
                 <button class="btn" onclick="loadData()">Load Data</button>
+                <button class="btn btn-telephony" onclick="openTelephony()">Open Telephony Data</button>
                 <button class="btn btn-green" onclick="exportTableToExcel()">Export to Excel</button>
                 <button class="btn btn-green" onclick="exportTableToCSV()">Export to CSV</button>
                 <button class="btn btn-analytics" onclick="openAnalytics()">📊 View Analytics</button>
@@ -297,21 +298,7 @@
             modal.style.display = 'block';
         }
 
-
-
 //hasta aqui
-
-
-            //let content = `<div style="padding:20px;">`;
-            //for (let key in row) {
-                //const value = (typeof row[key] === 'number') ? row[key].toLocaleString() : row[key];
-                //content += `<p><strong>${key}:</strong> ${value}</p>`;
-            //}
-            //content += `</div>`;
-
-            //modalContent.innerHTML = content;
-            //modal.style.display = 'block';
-        //}
 
         function closeModal() {
             document.getElementById('drillDownModal').style.display = 'none';
@@ -370,6 +357,29 @@
             alert('Analytics feature would open here with current data filters applied!');
             console.log('Analytics data package:', analyticsDataPackage);
         }
+
+        //---------------
+        //TELEPHONY DATA
+        //---------------
+        function loadTelephonyData() {
+            const telephonyDataPackage = {
+                data: filteredData,
+                originalData: salesData,
+                filters: {
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value,                 
+                },
+                timestamp: new Date().toISOString()
+            };
+            alert('Telephony data feature would open here with current data filters applied!');
+            console.log('Telephony data package:', telephonyDataPackage);
+        }
+function openTelephony() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    window.open(`/telephony?start=${start}&end=${end}`, '_blank');
+}
+
     </script>
 </body>
 </html>

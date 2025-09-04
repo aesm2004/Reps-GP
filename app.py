@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, render_template
 import pyodbc, os
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-DEBUG_MODE = False  # False for production
+DEBUG_MODE = True  # False for production
 
 # --- Database connection ---
 DB_SERVER = os.environ.get('DB_SERVER', 'BC-SQL\\SAGE200')
@@ -74,6 +74,29 @@ def analytics():
         return render_template('analytics.html', data=results, columns=columns)
     except Exception as e:
         return render_template('analytics.html', data=[], columns=[], error=str(e))
+
+# --- Telephony pages ---
+@app.route('/telephony')
+@app.route('/telephony.html')
+def telephony_page():
+    # Just render the telephony dashboard HTML
+    return render_template('telephony.html')
+
+@app.route('/api/telephony')
+def telephony_api():
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+    try:
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+        cursor.execute("EXEC TelephonyDataSummary ?, ?", start_date, end_date)
+        columns = [column[0] for column in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # --- WSGI callable for IIS ---
 if not DEBUG_MODE:

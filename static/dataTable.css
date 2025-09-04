@@ -114,9 +114,25 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            overflow: auto;
             position: relative;
+            width: 100%;
         }
+
+        #dataTable {
+           table-layout: auto;
+           width: max-content;
+           min-width: 100%;
+        }
+
+        #dataTable th,
+#dataTable td {
+    white-space: nowrap;     /* keep numbers/text on one line */
+    text-overflow: ellipsis; /* show ... if clipped */
+    overflow: hidden;
+    max-width: 200px;        /* optional, adjust as needed */
+}
+
 
         .table-wrapper {
             overflow: auto;
@@ -377,6 +393,10 @@
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+         .btn-telephony {
+            background: linear-gradient(135deg, #f29317, #e8a251);
         }
 
         .btn-green {

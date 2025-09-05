@@ -107,7 +107,13 @@
             font-size: 1.2rem;
         }
 
-       
+        .company-logo {
+        height: 50px !important;
+        width: auto !important;
+         max-width: 250px !important;
+        object-fit: contain !important;
+        }
+        
         .table-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);

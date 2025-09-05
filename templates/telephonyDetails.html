@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telephony Analytics Summary  Data</title>
+    <title>Telephony Analytics Details Data</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='dataTable.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Telephony Analytics Summary Data</h1>
+            <h1>Telephony Analytics Details Data</h1>
             <div class="controls">
                 <label>Start Date <input type="date" id="startDate"></label>
                 <label>End Date <input type="date" id="endDate"></label>
-                <button class="btn" onclick="loadTelephony()">Refresh</button>
-                <button class="btn btn-telephony" onclick="openTelephonyDetails()">Telephony Details</button>
+                <button class="btn" onclick="loadTelephonyDetails()">Refresh</button>                
                  <button class="btn btn-green" onclick="exportTableToExcel()">Export to Excel</button>
                 <button class="btn btn-green" onclick="exportTableToCSV()">Export to CSV</button>
                 <button class="btn btn-goback" onclick="goBackToDashboard()">Previous Page</button>
@@ -51,10 +50,10 @@
              document.getElementById('startDate').value = formatDateLocal(firstDay);
             document.getElementById('endDate').value = formatDateLocal(today);
 
-            loadTelephony();
+            loadTelephonyDetails();
         });
 
-        async function loadTelephony() {
+        async function loadTelephonyDetails() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
 
@@ -62,14 +61,14 @@
             document.getElementById('dataTable').style.display = 'none';
 
             try {
-                const response = await fetch(`${BASE_URL}/api/telephony?start=${startDate}&end=${endDate}`);
+                const response = await fetch(`${BASE_URL}/api/telephonyDetails?start=${startDate}&end=${endDate}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 salesData = await response.json();
                 filteredData = [...salesData];
 
                 if (salesData.length > 0) {
-                    buildTableTelephony();
+                    buildTableTelephonyDetails();
                 } else {
                     document.getElementById('loadingMessage').innerText = "No data found";
                 }
@@ -80,7 +79,7 @@
         }
 
         // Build table from filteredData with fixed column order
-        function buildTableTelephony() {
+        function buildTableTelephonyDetails() {
             if (filteredData.length === 0) {
                 document.getElementById('loadingMessage').innerHTML = '<div class="no-results">No results found</div>';
                 document.getElementById('dataTable').style.display = 'none';
@@ -93,10 +92,11 @@
             body.innerHTML = '';
 
             const columns = [
-                'DealRep', 'Gamma_NEW_Seats', 'Gamma_RS_Seats', 'iPecs_NEW_Seats', 'iPecs_RS_Seats', 
-                '3CXNewSeats', '3CXRSSeats', 'TotSeats',
-                'Gamma_NEW_GP', 'Gamma_RS_GP', 'iPECS_NEW_GP', 'iPECS_RS_GP',
-                '3CX_NEW_GP', '3CX_RS_GP', 'Undefined_GP', 'DealTotalGP'
+                'DealRep','DealNumber','DealCustomerAccountNumber','CustomerAccountName','Gamma_NEW_Seats','Gamma_RS_Seats',
+                'iPecs_NEW_Seats','iPecs_RS_Seats','3CXNewSeats','3CXRSSeats','TotSeats','Gamma_NEW_GP','Gamma_RS_GP',
+                'iPECS_NEW_GP','iPECS_RS_GP','3CX_NEW_GP','3CX_RS_GP','Undefined_GP','DealTotalGP','DealStatus',
+                'CustomerOrderNumber','SageInvoiceDate','CRMOpportunityID','DealCompleteNotes'
+
             ];
 
             const headerRow = document.createElement('tr');
@@ -176,7 +176,7 @@
          //---------------
         //TELEPHONY DATA
         //---------------
-        function loadTelephonyDetails() {
+        function debugTelephonyDetails() {
             const telephonyDataPackage = {
                 data: filteredData,
                 originalData: salesData,
@@ -186,7 +186,7 @@
                 },
                 timestamp: new Date().toISOString()
             };
-            //alert('Telephony data details feature would open here with current data filters applied!');
+            alert('Telephony data feature would open here with current data filters applied!');
             console.log('Telephony data package:', telephonyDataPackage);
         }
 function openTelephonyDetails() {

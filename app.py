@@ -75,7 +75,7 @@ def analytics():
     except Exception as e:
         return render_template('analytics.html', data=[], columns=[], error=str(e))
 
-# --- Telephony pages ---
+# --- Telephony Summary pages ---
 @app.route('/telephony')
 @app.route('/telephony.html')
 def telephony_page():
@@ -90,6 +90,29 @@ def telephony_api():
         conn = pyodbc.connect(connection_string)
         cursor = conn.cursor()
         cursor.execute("EXEC TelephonyDataSummary ?, ?", start_date, end_date)
+        columns = [column[0] for column in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+    # --- Telephony Detaiails pages ---
+@app.route('/telephonyDetails')
+@app.route('/telephonyDetails.html')
+def telephonyDetails_page():
+    # Just render the telephony dashboard HTML
+    return render_template('telephonyDetails.html')
+
+@app.route('/api/telephonyDetails')
+def telephonyDetails_api():
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+    try:
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+        cursor.execute("EXEC TelephonyData ?, ?", start_date, end_date)
         columns = [column[0] for column in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
         cursor.close()
